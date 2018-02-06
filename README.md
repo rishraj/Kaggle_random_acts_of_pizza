@@ -7,7 +7,7 @@ Link : https://cs.stanford.edu/~althoff/raop-dataset/altruistic_requests_icwsm.p
 
 <p>Most of the features implemented in my code have been inspired from the above paper. Kindly see the paper to understand the features.</p>
 
-Working of my code:
+Working of my code:<br>
 <ul>
   <li>The 'train.py' takes as input 'train.json' and prepares the model 'my_model.pkl'</li>
   <li>Thereafter, 'test.py' takes as input 'test.json' and the model 'my_model.pkl' to prepare the file 'Submission.csv'</li>
