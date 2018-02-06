@@ -6,7 +6,7 @@ import re
 import datetime
 import _pickle as cPickle
 
-
+#*********************************** SAME CODE AS 'train.py' TO EXTRACT THE USEFUL FEATURES **********************************
 data = pd.read_json('test.json')
 
 row = data.shape[0]
@@ -142,22 +142,24 @@ X_to_keep = ['money','job','craving','request_length','karma','hyperlink','recip
 
 X_test = data[X_to_keep]
 
+#******************************************************************************************************************************
+
+
+# Loading the model formed by 'train.py'
 with open('my_model.pkl', 'rb') as fid:
     model_loaded = cPickle.load(fid)
 
+# Predicting the pizza getting probability
 y_pred = model_loaded.predict_proba(X_test)[:,1]
 
+# Adding the probabilities to the original dataframe
 data['requester_received_pizza'] = y_pred
 
+# Keeping the columns that are to be saved in the .csv file
 final_columns_required = ['request_id','requester_received_pizza']
 
+# Forming a dataframe with only the above columns
 final_df = data[final_columns_required]
 
+# Saving the dataframe in .csv as 'Submission.csv'
 final_df.to_csv('Submission.csv', index=False)
-
-
-
-
-
-
-
