@@ -10,14 +10,14 @@ import datetime
 import _pickle as cPickle
 import matplotlib.pyplot as plt
 
-#Reading the 'train.json' file and storing it as a pandas dataframe
+# Reading the 'train.json' file and storing it as a pandas dataframe
 data = pd.read_json('train.json')
 
-#Storing the dataframe dimensions for future usage
+# Storing the dataframe dimensions for future usage
 row = data.shape[0]
 col = data.shape[1]
 
-#Initialising various features as column vectors which will finally be added to the dataframe
+# Initialising various features as column vectors which will finally be added to the dataframe
 money = np.zeros((row, 1), dtype = float)
 job = np.zeros((row, 1), dtype = float)
 student = np.zeros((row, 1), dtype = float)
@@ -37,6 +37,7 @@ y_array = np.zeros((row, 1), dtype = int)
 
 
 for i in range(row):
+    # Cleaning the request_text_edit_aware by converting everything in lowercase and removing the stopwords
     words = nltk.tokenize.word_tokenize(data['request_text_edit_aware'][i])
     words = [w.lower() for w in words]
     words = [word for word in words if word.isalpha()]
@@ -45,7 +46,8 @@ for i in range(row):
     words = [word for word in words if word not in stop_words]
     n = len(words)
     words = " ".join(words)
-
+    
+    # Similarly cleaning request title
     title_words = nltk.tokenize.word_tokenize(data['request_title'][i])
     title_words = [w.lower() for w in title_words]
     title_words = [word for word in title_words if word.isalpha()]
@@ -53,7 +55,7 @@ for i in range(row):
     title_n = len(title_words)
     title_words = " ".join(title_words)
 
-
+    # Formation of the five different narrative topics identified through topic modelling(extracted from the paper)
     money_list = re.compile(r'(money|now|broke|week|until|time|last|day|when|today|tonight|paid|next|first|night|after|tomorrow|month|while|account|before|long|friday|rent|buy|bank|still|bills|ago|cash|due|soon|past|never|paycheck|check|spent|years|poor|till|yesterday|morning|dollars|financial|hour|bill|evening|credit|budget|loan|bucks|deposit|dollar|current|payed)')
     job_list = re.compile(r'(work|job|paycheck|unemployment|interview|fired|employment|hired|hire)')
     student_list = re.compile(r'(college|student|school|roommate|studying|university|finals|semester|class|study|project|dorm|tuition)')
@@ -67,25 +69,29 @@ for i in range(row):
     family_number = len(family_list.findall(words))+len(family_list.findall(title_words))
     craving_number = len(craving_list.findall(words))+len(craving_list.findall(title_words))
 
+    # Normalization of the narrative topics to remove the effect of text length
     if(n+title_n != 0):
         money[i][0] = money_number/(n+title_n)
         job[i][0] = job_number/(n+title_n)
         student[i][0] = student_number/(n+title_n)
         family[i][0] = family_number/(n+title_n)
         craving[i][0] = craving_number/(n+title_n)
-
+    
+    # Expressing hyperlink presence as a binary feature
     hyperlink_list = re.compile(r'http(s)?.*', re.DOTALL)
     if (len(hyperlink_list.findall(data['request_text_edit_aware'][i])) + len(hyperlink_list.findall(data['request_title'][i])) > 0):
         hyperlink[i][0] = 1
     else:
         hyperlink[i][0] = 0
-
+        
+    # Expressing reciprocity as a binary feature
     reciprocity_list = re.compile(r'pay.*forward|pay.*back|return.*favour|repay')
     if (len(reciprocity_list.findall(words)) + len(reciprocity_list.findall(title_words)) > 0):
         reciprocity[i][0] = 1
     else:
         reciprocity[i][0] = 0
 
+    # Expressing gratitude as a binary feature
     gratitude_list = re.compile(r'(thank|appreciate|thanks|gratitude|grateful|advance)')
     if len(gratitude_list.findall(words))+len(gratitude_list.findall(title_words)) > 0:
         gratitude[i][0] = 1
@@ -94,27 +100,31 @@ for i in range(row):
 
     karma[i][0] = data['requester_upvotes_minus_downvotes_at_request'][i]
 
+    # Expressing if a user has posted before as a binary feature
     if data['requester_number_of_posts_on_raop_at_request'][i] > 0:
         posted_before[i][0] = 1
     else:
         posted_before[i][0] = 0
 
+    # Expressing the month of the request as a binary feature - first 6 months or second 6 months
     if (datetime.datetime.utcfromtimestamp(data['unix_timestamp_of_request_utc'][i]).month <= 6):
         month[i][0] = 0
     else:
         month[i][0] = 1
 
+    # Calculating the community age till the date of the request in days
     initial_date = datetime.date(2010, 12, 8)
-
     difference = datetime.datetime.utcfromtimestamp(data['unix_timestamp_of_request_utc'][i]).date() - initial_date
     days_difference = difference.days
     community_age[i][0] = days_difference
 
+    # Storing the result as a binary feature
     if data['requester_received_pizza'][i]:
         y_array[i][0] = 1
     else:
         y_array[i][0] = 0
 
+    # Expressing the 'giver_username_if_known' as a binary feature
     if data['giver_username_if_known'][i] != 'N/A':
         giver_username[i][0] = 1
     else:
@@ -122,7 +132,7 @@ for i in range(row):
 
     request_length[i][0] = n + title_n
 
-
+# Converting the features into contiguous flattened arrays
 money = np.ravel(money)
 job = np.ravel(job)
 student = np.ravel(student)
@@ -134,7 +144,7 @@ community_age = np.ravel(community_age)
 month = np.ravel(month)
 giver_username = np.ravel(giver_username)
 
-
+# Adding the various features into the original dataframe
 data["money"] = pd.qcut(money, 10, duplicates='drop', labels=False)
 data["job"] = pd.qcut(job, 3, duplicates='drop', labels=False)
 data["student"] = pd.qcut(student, 10, duplicates='drop', labels=False)
@@ -153,7 +163,7 @@ data["y"] = y_array
 
 
 
-# #****************************     FEATURE EXAMINATION THROUGH PLOTS     *************************************************
+#******************************     FEATURE EXAMINATION THROUGH PLOTS     *************************************************
 
 # total_decile_number = np.zeros((10, 1), dtype = int)
 # successful_requests = np.zeros((10, 1), dtype = int)
@@ -177,25 +187,30 @@ data["y"] = y_array
 # plt.ylabel('success rate')
 # plt.show()
 
-# #*************************************************************************************************************************
+#***************************************************************************************************************************
 
 
 
-
+# Columns of the dataframe to be kept as a part of either 'X' or 'y'
 X_to_keep = ['money','job','craving','request_length','karma','hyperlink','reciprocity','gratitude','posted_before','month','community_age','giver_username']
 y_to_keep = ['y']
 
+# Forming the dataframes 'X' and 'y' from the columns mentioned above
 X = data[X_to_keep]
 y = data[y_to_keep]
 y = np.ravel(y)
 
+# The below commented line was used for cross validation on the training set.
 # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1234)
 
+
+# Fitting the training data into the model and saving it
 model = LogisticRegression()
 model.fit(X, y)
 with open('my_model.pkl', 'wb') as fid:
     cPickle.dump(model, fid)
 
+# The following lines of code were used to calculate the area under ROC curve on the cross validation test set
 # y_pred = logreg.predict_proba(X_test)[:,1]
 # print('Accuracy = {:.2f}'.format(logreg.score(X_test, y_test)))
 # print(roc_auc_score(y_test, y_pred))
