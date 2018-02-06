@@ -10,12 +10,14 @@ import datetime
 import _pickle as cPickle
 import matplotlib.pyplot as plt
 
-
+#Reading the 'train.json' file and storing it as a pandas dataframe
 data = pd.read_json('train.json')
 
+#Storing the dataframe dimensions for future usage
 row = data.shape[0]
 col = data.shape[1]
 
+#Initialising various features as column vectors which will finally be added to the dataframe
 money = np.zeros((row, 1), dtype = float)
 job = np.zeros((row, 1), dtype = float)
 student = np.zeros((row, 1), dtype = float)
@@ -149,11 +151,10 @@ data["community_age"] = pd.qcut(community_age, 10, duplicates='drop', labels=Fal
 data["giver_username"] = giver_username
 data["y"] = y_array
 
-# print(np.unique(data['request_length'],return_counts=True))
 
 
+# #****************************     FEATURE EXAMINATION THROUGH PLOTS     *************************************************
 
-# #******************************Features plot*************************************************8
 # total_decile_number = np.zeros((10, 1), dtype = int)
 # successful_requests = np.zeros((10, 1), dtype = int)
 # success_rate = np.zeros((10, 1), dtype = float)
@@ -174,9 +175,9 @@ data["y"] = y_array
 # plt.plot([0,1,2,3,4,5,6,7,8,9], success_rate)
 # plt.xlabel('request_length decile')
 # plt.ylabel('success rate')
-# plt.savefig('/home/rishav/Desktop/request_length.png')
 # plt.show()
-# #************************************Features plot end*************************************************88888
+
+# #*************************************************************************************************************************
 
 
 
