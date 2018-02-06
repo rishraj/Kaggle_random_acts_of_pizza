@@ -14,4 +14,4 @@ Working of my code:<br>
 </ul>
 
 RESULT:<br>
-The area under ROC curve obtained in the paper was 0.672 and I got 0.785 upon late submission.
+The area under ROC curve obtained in the paper was 0.672 and I got 0.785
