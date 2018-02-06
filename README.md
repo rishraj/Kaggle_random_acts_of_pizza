@@ -12,3 +12,6 @@ Working of my code:
   <li>The 'train.py' takes as input 'train.json' and prepares the model 'my_model.pkl'</li>
   <li>Thereafter, 'test.py' takes as input 'test.json' and the model 'my_model.pkl' to prepare the file 'Submission.csv'</li>
 </ul>
+
+RESULT:<br>
+The area under ROC curve obtained in the paper was 0.672 and I got 0.785 upon late submission.
