@@ -1,4 +1,4 @@
-# Kaggle_random_acts_of_pizza
+## Kaggle_random_acts_of_pizza
 
 <p>Here, I've built a ML model to predict the probability of a person getting his 'pizza' request fulfilled. The problem has been posted on Kaggle - https://www.kaggle.com/c/random-acts-of-pizza </p>
 
